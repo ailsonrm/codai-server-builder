@@ -221,10 +221,11 @@ print_message "${YELLOW}" "Configuring system security..."
 
 # Verifica AppArmor
 if ! apparmor_status | grep -q "apparmor module is loaded."; then
-  print_error "AppArmor module not loaded. Aborting."
+  print_message "${RED}" "AppArmor module not loaded. Aborting."
   exit 1
 else
-  print_success "AppArmor is active"
+  print_message "${GREEN}" "AppArmor is active"
+  
 fi
 
 # Initialize AIDE
