@@ -24,7 +24,7 @@ An comprehensive post-installation configuration tool for Ubuntu servers, stream
 Run the setup script on your server:
 
 ```bash
-bash <(curl -sSL https://raw.githubusercontent.com/felipefontoura/ubinkaze/stable/boot.sh)
+bash <(curl -sSL https://raw.githubusercontent.com/ailsonrm/codai-server-builder/stable/boot.sh)
 ```
 
 ## 🐋 Docker Swarm
