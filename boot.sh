@@ -2,10 +2,10 @@
 
 set -euo pipefail
 
-banner='▗▖ ▗▖▗▄▄▖ ▗▄▄▄▖▗▖  ▗▖▗▖ ▗▖ ▗▄▖ ▗▄▄▄▄▖▗▄▄▄▖
-▐▌ ▐▌▐▌ ▐▌  █  ▐▛▚▖▐▌▐▌▗▞▘▐▌ ▐▌   ▗▞▘▐▌   
-▐▌ ▐▌▐▛▀▚▖  █  ▐▌ ▝▜▌▐▛▚▖ ▐▛▀▜▌ ▗▞▘  ▐▛▀▀▘
-▝▚▄▞▘▐▙▄▞▘▗▄█▄▖▐▌  ▐▌▐▌ ▐▌▐▌ ▐▌▐▙▄▄▄▖▐▙▄▄▖
+banner='▗▖ ▗▖▗▄▖▗▄▖ ▗▄▄▖ ▗▖ ▗▖ ▗▖ ▗▖ ▗▄▖ ▗▄▖ ▗▖ ▄▖
+▐▌ ▐▌▐▛▘▐▛▘ ▐▌ ▐▌▐▌▗▞▘▐▌ ▐▌ ▐▌ ▐▌▐▛▘ ▐▛▘▐▌▗▛▚
+▐▌ ▐▌▐▙▄▐▌  ▐▙▄▘ ▐▛▚▖ ▐▛▀▜▌ ▐▌ ▐▌▐▌  ▐▌ ▐▛▘▐▌
+▝▚▄▞▘▐▌ ▐▙▄▖▐▌   ▐▌ ▐▌▐▌ ▐▌▐▝▄▞▘▐▙▄▖▐▌ ▐▙▄▐▌
 
 '
 
@@ -17,16 +17,17 @@ sudo apt-get update >/dev/null
 sudo apt-get install -y git >/dev/null
 
 echo "Cloning Ubinkaze..."
-rm -rf ~/.local/share/ubinkaze
-git clone https://github.com/felipefontoura/ubinkaze.git ~/.local/share/ubinkaze >/dev/null
+rm -rf ~/.local/share/codai-server-builder
+git clone https://github.com/ailsonrm/codai-server-builder.git ~/.local/share/codai-server-builder >/dev/null
+         
 
-UBINKAZE_REF=${UBINKAZE_REF:-"stable"}
+CODAI_SERVER_BUILDER_REF=${CODAI_SERVER_BUILDER_REF:-"stable"}
 
-if [[ $UBINKAZE_REF != "main" ]]; then
-  cd ~/.local/share/ubinkaze
-  git fetch origin "$UBINKAZE_REF" && git checkout "$UBINKAZE_REF"
+if [[ $CODAI_SERVER_BUILDER_REF != "main" ]]; then
+  cd ~/.local/share/codai-server-builder
+  git fetch origin "$CODAI_SERVER_BUILDER_REF" && git checkout "$CODAI_SERVER_BUILDER_REF"
   cd - >/dev/null
 fi
 
 echo "Installation starting..."
-source ~/.local/share/ubinkaze/install.sh
+source ~/.local/share/codai-server-builder/install.sh
