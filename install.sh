@@ -209,22 +209,23 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 # --- Time Synchronization ---
 print_message "${YELLOW}" "Configuring time synchronization..."
-systemctl stop systemd-timesyncd || true
-systemctl disable systemd-timesyncd || true
+
+# Remove timesyncd se existir (Ubuntu 24.04 usa chrony)
 apt-get remove -y systemd-timesyncd || true
 DEBIAN_FRONTEND=noninteractive apt-get install -y chrony
-if systemctl -q is-enabled systemd-timesyncd 2>/dev/null; then
-  systemctl disable systemd-timesyncd
-  systemctl stop systemd-timesyncd
-fi
-systemctl enable chrony.service || true # use .service to avoid alias issues
-systemctl start chrony.service
+systemctl enable chrony
+systemctl start chrony
+
 # --- System Hardening ---
 print_message "${YELLOW}" "Configuring system security..."
 
-# Configure AppArmor
-systemctl enable apparmor
-systemctl start apparmor
+# Verifica AppArmor
+if ! apparmor_status | grep -q "apparmor module is loaded."; then
+  print_error "AppArmor module not loaded. Aborting."
+  exit 1
+else
+  print_success "AppArmor is active"
+fi
 
 # Initialize AIDE
 aide --config=/etc/aide/aide.conf --init
