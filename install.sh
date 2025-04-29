@@ -225,14 +225,15 @@ if ! apparmor_status | grep -q "apparmor module is loaded."; then
   exit 1
 else
   print_message "${GREEN}" "AppArmor is active"
-  
 fi
 
 # Initialize AIDE
+print_message "${YELLOW}" "Initialize AIDE..."
 aide --config=/etc/aide/aide.conf --init
 mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 
 # Configure kernel parameters
+print_message "${YELLOW}" "Configure kernel parameters..."
 cat <<EOF >/etc/sysctl.d/99-security.conf
 # Network security
 net.ipv4.conf.all.send_redirects = 0
@@ -284,6 +285,7 @@ sysctl -p /etc/sysctl.d/99-security.conf
 sysctl --system # This loads all configs including the new one
 
 # Configure system limits
+print_message "${YELLOW}" "Configure system limits..."
 cat <<EOF >/etc/security/limits.d/docker.conf
 *       soft    nproc     10000
 *       hard    nproc     10000

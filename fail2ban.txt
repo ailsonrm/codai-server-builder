@@ -1,0 +1,114 @@
+✅ O que o fail2ban faz?
+Monitora tentativas de login (por exemplo, no SSH).
+
+Se alguém errar a senha/chave várias vezes seguidas, o IP é automaticamente bloqueado por um tempo.
+
+Bloqueios automáticos ajudam a proteger contra força bruta (tentativas aleatórias de senha).
+
+⚡ Instalar o fail2ban
+Atualize os pacotes:
+
+bash
+Copiar
+Editar
+sudo apt update
+Instale o fail2ban:
+
+bash
+Copiar
+Editar
+sudo apt install fail2ban -y
+⚙️ Configurar o fail2ban para proteger o SSH
+Crie uma cópia segura do arquivo de configuração padrão:
+
+bash
+Copiar
+Editar
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+Dica: Sempre edite o jail.local para manter as atualizações seguras no futuro.
+
+Edite o jail.local:
+
+bash
+Copiar
+Editar
+sudo nano /etc/fail2ban/jail.local
+Procure a seção [sshd] e ajuste para:
+
+ini
+Copiar
+Editar
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+bantime = 3600
+findtime = 600
+maxretry = 3
+Explicação rápida:
+
+enabled = true: ativa o monitoramento do SSH.
+
+port = ssh: protege a porta 22 (ou outra, se você mudou).
+
+bantime = 3600: bloqueia o IP por 1 hora (3600 segundos).
+
+findtime = 600: analisa as tentativas erradas nos últimos 10 minutos.
+
+maxretry = 3: após 3 tentativas erradas, o IP é banido.
+
+🔥 Ativar e iniciar o fail2ban
+Depois de configurar, ative o serviço:
+
+bash
+Copiar
+Editar
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
+Confirme se está rodando:
+
+bash
+Copiar
+Editar
+sudo systemctl status fail2ban
+Se estiver certo, vai aparecer active (running) ✅
+
+👀 Monitorar o que o fail2ban está fazendo
+Para ver quais IPs foram banidos:
+
+bash
+Copiar
+Editar
+sudo fail2ban-client status sshd
+Saída típica:
+
+yaml
+Copiar
+Editar
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed: 0
+|  |- Total failed: 5
+|  |- File list: /var/log/auth.log
+`- Actions
+   |- Currently banned: 1
+   |- Total banned: 2
+   |- Banned IP list: 200.123.45.67
+⚡ Resumo rápido
+
+Etapa	Comando
+Instalar fail2ban	sudo apt install fail2ban -y
+Configurar SSH	editar /etc/fail2ban/jail.local
+Ativar serviço	sudo systemctl enable fail2ban && sudo systemctl start fail2ban
+Verificar IPs banidos	sudo fail2ban-client status sshd
+🎯 Agora seu servidor vai se proteger automaticamente de ataques de força bruta!
+Se quiser, também posso te ensinar como:
+
+Personalizar mensagens de banimento.
+
+Bloquear IPs automaticamente no firewall (UFW ou iptables).
+
+Configurar alertas por e-mail quando alguém for banido.
+
+Quer que eu te mostre também? 🚀📩
