@@ -11,13 +11,13 @@ banner=' ██████╗ ██████╗ ██████╗  █�
                                     '
 
 echo -e "$banner"
-echo "=> Ubinkaze is for fresh Ubuntu Server 24.04 installations only!"
+echo "=> CODAI server tool is for fresh Ubuntu Server 24.04 installations only!"
 echo -e "\nBegin installation (or abort with ctrl+c)..."
 
 sudo apt-get update >/dev/null
 sudo apt-get install -y git >/dev/null
 
-echo "Cloning Ubinkaze..."
+echo "Cloning CODAI SERVER BUILDER..."
 rm -rf ~/.local/share/codai-server-builder
 git clone https://github.com/ailsonrm/codai-server-builder.git ~/.local/share/codai-server-builder >/dev/null
          
