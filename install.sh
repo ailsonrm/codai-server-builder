@@ -24,6 +24,8 @@ spinner() {
     local pid=$1
     local delay=0.1
     local spin='|/-\'
+    local i=0
+    
     while kill -0 $pid 2>/dev/null; do
         i=$(( (i + 1) % 4 ))
         printf "\r[%c] Carregando..." "${spin:$i:1}"
@@ -31,6 +33,7 @@ spinner() {
     done
     printf "\r[✔] Concluído!       \n"
 }
+
 
 
 # --- Functions ---
