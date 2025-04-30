@@ -413,7 +413,12 @@ if [ -f /root/.ssh/authorized_keys ]; then
   chmod 600 /home/docker/.ssh/authorized_keys
 fi
 
-PASSWORD_DOCKER=$(openssl rand -base64 16)
+PASSWORD_DOCKER=$(< /dev/urandom tr -dc 'A-Za-z0-9!@#%&' | head -c 16)
+
+if [[ -z "${PASSWORD_DOCKER}" ]]; then
+  print_error "Falha ao gerar senha aleatória para o usuário docker"
+  exit 1
+fi
 
 echo "docker:$PASSWORD_DOCKER" | sudo chpasswd
 sudo passwd -u docker
