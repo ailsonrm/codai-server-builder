@@ -518,6 +518,7 @@ cat <<EOF >/etc/audit/rules.d/audit.rules
 EOF
 
 # Reload audit rules
+sudo auditctl -D
 auditctl -R /etc/audit/rules.d/audit.rules
 
 # Configure unattended-upgrades for automated security updates
