@@ -45,6 +45,10 @@ Uma ferramenta abrangente de configuração pós-instalação para servidores Ub
     #Reboot automático:
     0 3 * * 0 /sbin/shutdown -r +15
   ```
+- Gerar public key
+  ```bash
+  ssh-keygen -t rsa -b 4096 -C "ailson.rm.dev@gmail.com"
+  ```
 
 - Usuário administrativo
   ```bash
