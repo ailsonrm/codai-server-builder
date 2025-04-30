@@ -14,6 +14,7 @@ Uma ferramenta abrangente de configuração pós-instalação para servidores Ub
 
 ## 📋 Pré-requisitos
 
+- Apenas para Windows -> Não rodar no GitBash(tem limite de tempo), rodar no PowerShell ou CMD
 - Ubuntu Server (24.04)
 - Acesso root ou via sudo
 - Criação alias de status
