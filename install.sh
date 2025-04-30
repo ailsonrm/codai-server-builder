@@ -19,6 +19,20 @@ RED='\033[0;31m'
 ICON='\xF0\x9F\x8C\x80'
 NC='\033[0m'
 
+# --- Spinner
+spinner() {
+    local pid=$1
+    local delay=0.1
+    local spin='|/-\'
+    while kill -0 $pid 2>/dev/null; do
+        i=$(( (i + 1) % 4 ))
+        printf "\r[%c] Carregando..." "${spin:$i:1}"
+        sleep $delay
+    done
+    printf "\r[✔] Concluído!       \n"
+}
+
+
 # --- Functions ---
 print_message() {
   local color=$1
@@ -79,6 +93,22 @@ check_resources() {
     exit 1
   fi
 }
+
+check_docker_user_unlocked() {
+  local status=$(passwd -S docker 2>/dev/null | awk '{print $2}')
+  
+  if [[ "$status" == "L" ]]; then
+    echo "Usuário 'docker' está BLOQUEADO."
+    return 1
+  elif [[ "$status" == "P" ]]; then
+    echo "Usuário 'docker' está DESBLOQUEADO."
+    return 0
+  else
+    echo "Usuário 'docker' não encontrado ou em estado desconhecido."
+    return 2
+  fi
+}
+
 
 verify_security_settings() {
   local failed=0
@@ -179,8 +209,8 @@ check_resources
 
 # --- System Updates ---
 print_message "${YELLOW}" "Updating system packages..."
-apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+apt-get update & spinner $!
+DEBIAN_FRONTEND=noninteractive apt-get upgrade -y  & spinner $!
 
 # --- Essential Packages ---
 print_message "${YELLOW}" "Installing essential packages..."
@@ -205,14 +235,14 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
   rkhunter \
   logwatch \
   git \
-  python3-pyinotify
+  python3-pyinotify & spinner $!
 
 # --- Time Synchronization ---
 print_message "${YELLOW}" "Configuring time synchronization..."
 
 # Remove timesyncd se existir (Ubuntu 24.04 usa chrony)
-apt-get remove -y systemd-timesyncd || true
-DEBIAN_FRONTEND=noninteractive apt-get install -y chrony
+apt-get remove -y systemd-timesyncd || true & spinner $!
+DEBIAN_FRONTEND=noninteractive apt-get install -y chrony & spinner $!
 systemctl enable chrony
 systemctl start chrony
 
@@ -228,9 +258,9 @@ else
 fi
 
 # Initialize AIDE
-print_message "${YELLOW}" "Initialize AIDE..."
-aide --config=/etc/aide/aide.conf --init
-mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+#print_message "${YELLOW}" "Initialize AIDE..."
+#aide --config=/etc/aide/aide.conf --init & spinner $!
+#mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db & spinner $!
 
 # Configure kernel parameters
 print_message "${YELLOW}" "Configure kernel parameters..."
@@ -279,7 +309,7 @@ net.ipv4.conf.all.log_martians = 0
 net.ipv4.conf.default.log_martians = 0
 net.ipv6.conf.all.accept_ra = 0
 net.ipv6.conf.default.accept_ra = 0
-EOF
+EOF & spinner $!
 
 sysctl -p /etc/sysctl.d/99-security.conf
 sysctl --system # This loads all configs including the new one
@@ -295,13 +325,13 @@ cat <<EOF >/etc/security/limits.d/docker.conf
 *       hard    core      0
 *       soft    stack     8192
 *       hard    stack     8192
-EOF
+EOF & spinner $!
 
 # --- Docker Installation ---
 print_message "${YELLOW}" "Installing Docker..."
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
-rm get-docker.sh
+curl -fsSL https://get.docker.com -o get-docker.sh & spinner $!
+sh get-docker.sh & spinner $!
+rm get-docker.sh & spinner $!
 
 # --- Docker Configuration ---
 print_message "${YELLOW}" "Configuring Docker..."
@@ -338,7 +368,7 @@ cat <<EOF >/etc/docker/daemon.json
         }
     }
 }
-EOF
+EOF & spinner $!
 
 # After Docker daemon.json configuration
 print_message "${YELLOW}" "Testing Docker configuration..."
@@ -361,11 +391,12 @@ docker info | grep -E "Cgroup Driver|Storage Driver|Logging Driver"
 
 # --- User Setup ---
 print_message "${YELLOW}" "Creating docker user..."
-adduser --system --group --shell /bin/bash --home /home/docker --disabled-password docker
-usermod -aG docker docker
+#adduser --system --group --shell /bin/bash --home /home/docker --disabled-password docker & spinner $!
+adduser -m -s /bin/bash docker & spinner $!
+groupadd -f docker & spinner $!
+usermod -aG docker docker & spinner $!
 
 # --- SSH Configuration ---
-
 print_message "${YELLOW}" "Configuring SSH..."
 mkdir -p /home/docker/.ssh
 chown -R docker:docker /home/docker
@@ -378,6 +409,12 @@ if [ -f /root/.ssh/authorized_keys ]; then
   chmod 700 /home/docker/.ssh
   chmod 600 /home/docker/.ssh/authorized_keys
 fi
+
+PASSWORD_DOCKER=$(openssl rand -base64 16)
+
+echo "docker:$PASSWORD_DOCKER" | sudo chpasswd
+sudo passwd -u docker
+check_docker_user_unlocked
 
 cat <<EOF >/etc/ssh/sshd_config
 Include /etc/ssh/sshd_config.d/*.conf
@@ -411,7 +448,7 @@ AllowAgentForwarding no
 AllowTcpForwarding yes  # Required for Docker forwarding
 X11Forwarding no
 PermitTTY yes
-PrintMotd no
+PrintMotd yes
 
 ClientAliveInterval 300
 ClientAliveCountMax 2
@@ -422,9 +459,9 @@ AllowUsers docker root
 KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256
 Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr
 MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
-EOF
+EOF & spinner $!
 
-systemctl reload ssh
+systemctl reload ssh & spinner $!
 
 # --- Firewall Configuration ---
 print_message "${YELLOW}" "Configuring firewall..."
@@ -443,7 +480,7 @@ cat <<EOF >/etc/fail2ban/filter.d/docker.conf
 [Definition]
 failregex = failed login attempt from <HOST>
 ignoreregex =
-EOF
+EOF & spinner $!
 
 cat <<EOF >/etc/fail2ban/jail.local
 [DEFAULT]
@@ -467,7 +504,7 @@ filter = docker
 logpath = /var/log/auth.log
 maxretry = 5
 bantime = 3600
-EOF
+EOF & spinner $!
 
 # --- Enable and Start Services ---
 print_message "${YELLOW}" "Enabling services..."
@@ -494,7 +531,7 @@ cat <<EOF >/etc/logrotate.d/docker-logs
     delaycompress
     copytruncate
 }
-EOF
+EOF & spinner $!
 
 # Automated cleanup to prevent residual files
 print_message "${YELLOW}" "Setting up maintenance tasks..."
