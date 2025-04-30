@@ -406,7 +406,7 @@ groupadd -f docker
 if id "docker" &>/dev/null; then
   print_warning "User 'docker' already exists. Skipping creation."
 else
-  adduser --shell /bin/bash --home /home/docker --disabled-password --ingroup docker docker
+  adduser --shell /bin/bash --home /home/docker --disabled-password --ingroup docker --gecos "" docker
   print_success "User 'docker' created successfully."
 fi
 usermod -aG docker docker
