@@ -34,7 +34,14 @@ spinner() {
     printf "\r[✔] Concluído!       \n"
 }
 
-
+generate_password() {
+  local pass=$(tr -dc 'A-Za-z0-9!@#%&' < /dev/urandom | head -c 16 || true)
+  if [[ -z "${pass:-}" ]]; then
+    print_error "Falha ao gerar senha aleatória"
+    exit 1
+  fi
+  echo "$pass"
+}
 
 # --- Functions ---
 print_message() {
@@ -413,12 +420,7 @@ if [ -f /root/.ssh/authorized_keys ]; then
   chmod 600 /home/docker/.ssh/authorized_keys
 fi
 
-PASSWORD_DOCKER=$(< /dev/urandom tr -dc 'A-Za-z0-9!@#%&' | head -c 16)
-
-if [[ -z "${PASSWORD_DOCKER}" ]]; then
-  print_error "Falha ao gerar senha aleatória para o usuário docker"
-  exit 1
-fi
+PASSWORD_DOCKER="$(generate_password)"
 
 echo "docker:$PASSWORD_DOCKER" | sudo chpasswd
 sudo passwd -u docker
