@@ -401,9 +401,14 @@ docker info | grep -E "Cgroup Driver|Storage Driver|Logging Driver"
 
 # --- User Setup ---
 print_message "${YELLOW}" "Creating docker user..."
-#adduser --system --group --shell /bin/bash --home /home/docker --disabled-password docker
-adduser -m -s /bin/bash docker
 groupadd -f docker
+
+if id "docker" &>/dev/null; then
+  print_warning "User 'docker' already exists. Skipping creation."
+else
+  adduser --shell /bin/bash --home /home/docker --disabled-password --ingroup docker docker
+  print_success "User 'docker' created successfully."
+fi
 usermod -aG docker docker
 
 # --- SSH Configuration ---
