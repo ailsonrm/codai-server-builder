@@ -420,9 +420,7 @@ if [ -f /root/.ssh/authorized_keys ]; then
   chmod 600 /home/docker/.ssh/authorized_keys
 fi
 
-PASSWORD_DOCKER="$(generate_password)"
-
-echo "docker:$PASSWORD_DOCKER" | sudo chpasswd
+echo "docker:$(generate_password)" | sudo chpasswd
 sudo passwd -u docker
 check_docker_user_unlocked
 
