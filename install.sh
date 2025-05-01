@@ -444,7 +444,7 @@ SyslogFacility AUTH
 LogLevel VERBOSE
 
 LoginGraceTime 30
-PermitRootLogin prohibit-password
+PermitRootLogin yes
 StrictModes yes
 MaxAuthTries 10
 MaxSessions 5
@@ -452,7 +452,7 @@ MaxSessions 5
 PubkeyAuthentication yes
 HostbasedAuthentication no
 IgnoreRhosts yes
-PasswordAuthentication no
+PasswordAuthentication yes
 PermitEmptyPasswords no
 ChallengeResponseAuthentication no
 
@@ -476,11 +476,11 @@ EOF
 
 
 cat <<EOF >/etc/ssh/sshd_config.d/60-cloudimg-settings.conf
-PasswordAuthentication no
+PasswordAuthentication yes
 EOF
 
 cat <<EOF >/etc/ssh/sshd_config.d/50-cloud-init.conf
-PasswordAuthentication no
+PasswordAuthentication yes
 EOF
 
 cat <<EOF >/etc/cloud/cloud.cfg.d/99-disable-ssh.cfg
