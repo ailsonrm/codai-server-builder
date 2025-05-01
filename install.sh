@@ -269,8 +269,8 @@ fi
 
 # Initialize AIDE
 print_message "${YELLOW}" "Initialize AIDE..."
-ide --config=/etc/aide/aide.conf --init
-v /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+aide --config=/etc/aide/aide.conf --init
+mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 
 # Configure kernel parameters
 print_message "${YELLOW}" "Configure kernel parameters..."
