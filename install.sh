@@ -474,6 +474,23 @@ Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.
 MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
 EOF
 
+
+cat <<EOF >/etc/ssh/sshd_config.d/60-cloudimg-settings.conf
+PasswordAuthentication no
+EOF
+
+cat <<EOF >/etc/ssh/sshd_config.d/50-cloud-init.conf
+PasswordAuthentication no
+EOF
+
+cat <<EOF >/etc/cloud/cloud.cfg.d/99-disable-ssh.cfg
+ssh_deletekeys: 0
+ssh_genkeytypes: []
+disable_root: false
+preserve_hostname: true
+ssh_pwauth: 0
+EOF
+
 systemctl reload ssh
 
 # --- Firewall Configuration ---
