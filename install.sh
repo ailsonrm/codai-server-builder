@@ -354,8 +354,7 @@ cat <<EOF >/etc/docker/daemon.json
         "max-file": "3"
     },
     "icc": true,
-    "live-restore": false,
-    "userland-proxy": false,
+    "live-restore": true,
     "no-new-privileges": true,
     "default-ulimits": {
         "nofile": {
@@ -567,7 +566,7 @@ EOF
 print_message "${YELLOW}" "Setting up maintenance tasks..."
 cat <<EOF >/etc/cron.daily/docker-cleanup
 #!/bin/bash
-docker system prune -af --volumes
+docker system prune -af
 docker builder prune -af --keep-storage=20GB
 EOF
 chmod +x /etc/cron.daily/docker-cleanup
