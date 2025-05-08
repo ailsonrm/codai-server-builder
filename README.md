@@ -28,7 +28,7 @@ Uma ferramenta abrangente de configuração pós-instalação para servidores Ub
 - Configuração do Host
   
   ```bash
-    hostnamectl set-hostname codai-swarm-manager
+    hostnamectl set-hostname codai-swarm-manager-01
     
     nano /etc/hosts
     
@@ -39,8 +39,10 @@ Uma ferramenta abrangente de configuração pós-instalação para servidores Ub
   ```bash
     apt update
     apt upgrade
-    apt-get install unattended-upgrades
+    apt install unattended-upgrades
     dpkg-reconfigure unattended-upgrades
+
+    crontab -e
 
     #Reboot automático:
     0 3 * * 0 /sbin/shutdown -r +15
@@ -94,6 +96,8 @@ Uma ferramenta abrangente de configuração pós-instalação para servidores Ub
 
 - Firewall
   ```bash
+  
+  
   sudo ufw allow 22
   sudo ufw allow http
   sudo ufw allow https

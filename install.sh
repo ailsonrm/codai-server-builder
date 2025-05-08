@@ -19,31 +19,6 @@ RED='\033[0;31m'
 ICON='\xF0\x9F\x8C\x80'
 NC='\033[0m'
 
-# --- Spinner
-spinner() {
-    local pid=$1
-    local delay=0.1
-    local spin='|/-\'
-    local i=0
-    
-    while kill -0 $pid 2>/dev/null; do
-        i=$(( (i + 1) % 4 ))
-        printf "\r[%c] Carregando..." "${spin:$i:1}"
-        sleep $delay
-    done
-    printf "\r[✔] Concluído!       \n"
-}
-
-generate_password() {
-  local pass=$(tr -dc 'A-Za-z0-9!@#%&' < /dev/urandom | head -c 16 || true)
-  if [[ -z "${pass:-}" ]]; then
-    print_error "Falha ao gerar senha aleatória"
-    exit 1
-  fi
-  echo "$pass"
-}
-
-# --- Functions ---
 print_message() {
   local color=$1
   local message=$2
@@ -171,10 +146,10 @@ verify_security_settings() {
   done
 
   # Check AIDE database
-  if [ ! -f /var/lib/aide/aide.db ]; then
-    print_error "AIDE database not initialized"
-    failed=1
-  fi
+  #if [ ! -f /var/lib/aide/aide.db ]; then
+  #  print_error "AIDE database not initialized"
+  #  failed=1
+  #fi
 
   # Check Chrony sync
   if ! chronyc tracking &>/dev/null; then
@@ -241,11 +216,11 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
   acl \
   apparmor \
   apparmor-utils \
-  aide \
   rkhunter \
   logwatch \
   git \
   python3-pyinotify
+  #aide \
 
 # --- Time Synchronization ---
 print_message "${YELLOW}" "Configuring time synchronization..."
@@ -268,9 +243,9 @@ else
 fi
 
 # Initialize AIDE
-print_message "${YELLOW}" "Initialize AIDE..."
-aide --config=/etc/aide/aide.conf --init
-mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+#print_message "${YELLOW}" "Initialize AIDE..."
+#aide --config=/etc/aide/aide.conf --init
+#mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 
 # Configure kernel parameters
 print_message "${YELLOW}" "Configure kernel parameters..."
@@ -424,7 +399,7 @@ if [ -f /root/.ssh/authorized_keys ]; then
   chmod 600 /home/docker/.ssh/authorized_keys
 fi
 
-echo "docker:$(generate_password)" | sudo chpasswd
+echo "docker:417502" | sudo chpasswd
 sudo passwd -u docker
 check_docker_user_unlocked
 
@@ -443,7 +418,7 @@ SyslogFacility AUTH
 LogLevel VERBOSE
 
 LoginGraceTime 30
-PermitRootLogin yes
+PermitRootLogin no
 StrictModes yes
 MaxAuthTries 10
 MaxSessions 5
@@ -451,9 +426,10 @@ MaxSessions 5
 PubkeyAuthentication yes
 HostbasedAuthentication no
 IgnoreRhosts yes
-PasswordAuthentication yes
+PasswordAuthentication no
 PermitEmptyPasswords no
 ChallengeResponseAuthentication no
+KbdInteractiveAuthentication no
 
 UsePAM yes
 AllowAgentForwarding no
@@ -466,7 +442,7 @@ ClientAliveInterval 300
 ClientAliveCountMax 2
 TCPKeepAlive no
 
-AllowUsers docker root
+AllowUsers codai docker
 
 KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256
 Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr
@@ -475,11 +451,11 @@ EOF
 
 
 cat <<EOF >/etc/ssh/sshd_config.d/60-cloudimg-settings.conf
-PasswordAuthentication yes
+PasswordAuthentication no
 EOF
 
 cat <<EOF >/etc/ssh/sshd_config.d/50-cloud-init.conf
-PasswordAuthentication yes
+PasswordAuthentication no
 EOF
 
 cat <<EOF >/etc/cloud/cloud.cfg.d/99-disable-ssh.cfg
@@ -566,7 +542,7 @@ EOF
 print_message "${YELLOW}" "Setting up maintenance tasks..."
 cat <<EOF >/etc/cron.daily/docker-cleanup
 #!/bin/bash
-docker system prune -af
+docker system prune -af --volumes
 docker builder prune -af --keep-storage=20GB
 EOF
 chmod +x /etc/cron.daily/docker-cleanup
