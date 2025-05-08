@@ -223,6 +223,10 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
   #aide \
 
 # --- Time Synchronization ---
+print_message "${YELLOW}" "Configuring Custom Alias..."
+echo "alias status='run-parts /etc/update-motd.d/'" >> ~/.bashrc
+
+# --- Time Synchronization ---
 print_message "${YELLOW}" "Configuring time synchronization..."
 
 # Remove timesyncd se existir (Ubuntu 24.04 usa chrony)
